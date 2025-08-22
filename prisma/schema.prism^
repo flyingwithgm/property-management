@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+// ... rest of your models
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String?
+  tier          String     @default("free")
+  properties    Property[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Property {
+  id            String     @id @default(cuid())
+  name          String
+  address       String
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  tenants       Tenant[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Tenant {
+  id            String     @id @default(cuid())
+  name          String
+  email         String?
+  phone         String?
+  propertyId    String
+  property      Property   @relation(fields: [propertyId], references: [id])
+  payments      Payment[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Payment {
+  id            String     @id @default(cuid())
+  amount        Float
+  dueDate       DateTime
+  paidDate      DateTime?
+  status        String     @default("pending")
+  tenantId      String
+  tenant        Tenant     @relation(fields: [tenantId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
